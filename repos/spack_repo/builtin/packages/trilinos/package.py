@@ -459,7 +459,6 @@ class Trilinos(CMakePackage, CudaPackage, ROCmPackage):
     for plat in ["darwin", "linux"]:
         depends_on("hypre~int64", when="+hypre platform=%s" % plat)
     depends_on("hypre-cmake~int64", when="+hypre platform=windows")
-    depends_on("kokkos-nvcc-wrapper", when="+wrapper")
     depends_on("lapack")
     # depends_on('perl', type=('build',)) # TriBITS finds but doesn't use...
     depends_on("libx11", when="+x11")
@@ -634,7 +633,7 @@ class Trilinos(CMakePackage, CudaPackage, ROCmPackage):
     @property
     def kokkos_cxx(self) -> str:
         if self.spec.satisfies("+wrapper"):
-            return self["kokkos-nvcc-wrapper"].kokkos_cxx
+            return self["kokkos"].kokkos_cxx
         # Assumes build-time globals have been set already
         return spack_cxx
 
@@ -642,11 +641,11 @@ class Trilinos(CMakePackage, CudaPackage, ROCmPackage):
         spec = self.spec
         if "+cuda" in spec and "+wrapper" in spec:
             if "+mpi" in spec:
-                env.set("OMPI_CXX", self["kokkos-nvcc-wrapper"].kokkos_cxx)
-                env.set("MPICH_CXX", self["kokkos-nvcc-wrapper"].kokkos_cxx)
-                env.set("MPICXX_CXX", self["kokkos-nvcc-wrapper"].kokkos_cxx)
+                env.set("OMPI_CXX", self["kokkos"].kokkos_cxx)
+                env.set("MPICH_CXX", self["kokkos"].kokkos_cxx)
+                env.set("MPICXX_CXX", self["kokkos"].kokkos_cxx)
             else:
-                env.set("CXX", self["kokkos-nvcc-wrapper"].kokkos_cxx)
+                env.set("CXX", self["kokkos"].kokkos_cxx)
 
         if "+rocm" in spec:
             if "+mpi" in spec:
