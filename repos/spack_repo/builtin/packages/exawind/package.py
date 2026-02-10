@@ -72,7 +72,7 @@ class Exawind(CMakePackage, CudaPackage, ROCmPackage):
     depends_on("openfast+cxx@2.6.0:")
     depends_on("nalu-wind+kynema", when="+kynema")
     depends_on("amr-wind+sycl", when="+amr_wind_gpu+sycl")
-    depends_on("kokkos-nvcc-wrapper", type="build", when="+cuda")
+    depends_on("kokkos")
     depends_on("mpi")
     depends_on("nalu-wind+gpu-aware-mpi", when="+gpu-aware-mpi")
     depends_on("amr-wind+gpu-aware-mpi", when="+gpu-aware-mpi")
@@ -134,9 +134,9 @@ class Exawind(CMakePackage, CudaPackage, ROCmPackage):
             # Manually turn off device self.defines to solve Kokkos issues in Nalu-Wind headers
             env.append_flags("CXXFLAGS", "-U__HIP_DEVICE_COMPILE__ -DDESUL_HIP_RDC")
         if self.spec.satisfies("+cuda"):
-            env.set("OMPI_CXX", self["kokkos-nvcc-wrapper"].kokkos_cxx)
-            env.set("MPICH_CXX", self["kokkos-nvcc-wrapper"].kokkos_cxx)
-            env.set("MPICXX_CXX", self["kokkos-nvcc-wrapper"].kokkos_cxx)
+            env.set("OMPI_CXX", self["kokkos"].kokkos_cxx)
+            env.set("MPICH_CXX", self["kokkos"].kokkos_cxx)
+            env.set("MPICXX_CXX", self["kokkos"].kokkos_cxx)
         if self.spec.satisfies("+rocm"):
             env.set("OMPI_CXX", self.spec["hip"].hipcc)
             env.set("MPICH_CXX", self.spec["hip"].hipcc)
