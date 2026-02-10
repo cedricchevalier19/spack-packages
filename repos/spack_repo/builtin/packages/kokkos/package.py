@@ -290,8 +290,6 @@ class Kokkos(CMakePackage, CudaPackage, ROCmPackage):
 
     variant("wrapper", default=False, description="Use nvcc-wrapper for CUDA build")
     variant("cmake_lang", default=False, description="Use CMake language support for CUDA/HIP")
-    depends_on("kokkos-nvcc-wrapper", when="+wrapper")
-    depends_on("kokkos-nvcc-wrapper@develop", when="@develop+wrapper")
     conflicts("+wrapper", when="~cuda")
     conflicts("+wrapper", when="+cmake_lang")
 
@@ -381,9 +379,22 @@ class Kokkos(CMakePackage, CudaPackage, ROCmPackage):
     @property
     def kokkos_cxx(self) -> str:
         if self.spec.satisfies("+wrapper"):
-            return self["kokkos-nvcc-wrapper"].kokkos_cxx
+            return join_path(self.prefix.bin, "nvcc_wrapper")
+
         # Assumes build-time globals have been set already
         return spack_cxx
+
+    def setup_dependent_build_environment(
+        self, env: EnvironmentModifications, dependent_spec: Spec
+    ) -> None:
+        with when(self.spec.satisfies("+wrapper")):
+            wrapper = join_path(self.prefix.bin, "nvcc_wrapper")
+            env.set("CUDA_ROOT", dependent_spec["cuda"].prefix)
+            env.set("NVCC_WRAPPER_DEFAULT_COMPILER", self.compiler.cxx)
+            env.set("KOKKOS_CXX", self.compiler.cxx)
+            env.set("MPICH_CXX", wrapper)
+            env.set("OMPI_CXX", wrapper)
+            env.set("MPICXX_CXX", wrapper)  # HPE MPT
 
     def cmake_args(self):
         spec = self.spec
@@ -441,9 +452,7 @@ class Kokkos(CMakePackage, CudaPackage, ROCmPackage):
             if spec.satisfies(f"+{tpl}"):
                 options.append(self.define(tpl + "_DIR", spec[tpl].prefix))
 
-        if self.spec.satisfies("+wrapper"):
-            options.append(self.define("CMAKE_CXX_COMPILER", self.kokkos_cxx))
-        elif "+rocm" in self.spec:
+        if "+rocm" in self.spec:
             if "+cmake_lang" in self.spec:
                 if self.spec.satisfies("%cxx=clang"):
                     options.append(self.define("CMAKE_HIP_COMPILER", self.compiler.cxx))
@@ -530,7 +539,7 @@ class Kokkos(CMakePackage, CudaPackage, ROCmPackage):
 
         if self.spec.satisfies("+wrapper"):
             cmake_args.append(
-                self.define("CMAKE_CXX_COMPILER", self["kokkos-nvcc-wrapper"].kokkos_cxx)
+                self.define("CMAKE_CXX_COMPILER", join_path(self.prefix.bin, "nvcc_wrapper"))
             )
         else:
             cmake_args.append(self.define("CMAKE_CXX_COMPILER", self["cxx"].cxx))
