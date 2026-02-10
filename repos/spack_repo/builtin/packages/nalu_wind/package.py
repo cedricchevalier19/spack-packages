@@ -87,7 +87,7 @@ class NaluWind(CMakePackage, CudaPackage, ROCmPackage):
     depends_on("tioga@1.0.0:", when="+tioga")
     depends_on("hypre@2.18.2: ~int64+mpi~superlu-dist", when="+hypre")
     depends_on("trilinos+muelu+belos+amesos2+ifpack2", when="+trilinos-solvers")
-    depends_on("kokkos-nvcc-wrapper", type="build", when="+cuda")
+    depends_on("kokkos")
     depends_on("trilinos-catalyst-ioss-adapter", when="+catalyst")
     depends_on("fftw+mpi", when="+fftw")
     depends_on("nccmp")
@@ -157,9 +157,9 @@ class NaluWind(CMakePackage, CudaPackage, ROCmPackage):
         spec = self.spec
         env.append_flags("CXXFLAGS", "-DUSE_STK_SIMD_NONE")
         if spec.satisfies("+cuda"):
-            env.set("OMPI_CXX", self["kokkos-nvcc-wrapper"].kokkos_cxx)
-            env.set("MPICH_CXX", self["kokkos-nvcc-wrapper"].kokkos_cxx)
-            env.set("MPICXX_CXX", self["kokkos-nvcc-wrapper"].kokkos_cxx)
+            env.set("OMPI_CXX", self["kokkos"].kokkos_cxx)
+            env.set("MPICH_CXX", self["kokkos"].kokkos_cxx)
+            env.set("MPICXX_CXX", self["kokkos"].kokkos_cxx)
         if spec.satisfies("+rocm"):
             env.append_flags("CXXFLAGS", "-fgpu-rdc")
 
