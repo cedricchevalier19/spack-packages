@@ -26,7 +26,6 @@ class KokkosComm(CMakePackage):
 
     # Mandatory dependencies
     depends_on("cxx", type="build")
-    depends_on("c", type="build")  # temporary, for googletest
     depends_on("cmake@3.25:", type="build")
 
     depends_on("kokkos@4.7:")
@@ -43,7 +42,6 @@ class KokkosComm(CMakePackage):
         args = [
             self.define_from_variant("KokkosComm_ENABLE_MPI", "mpi"),
             self.define_from_variant("KokkosComm_ENABLE_NCCL", "nccl"),
-            self.define("KokkosComm_ENABLE_TESTS", True),  # To be removed, for test
         ]
 
         if self.spec.satisfies("^kokkos+rocm") and not (
