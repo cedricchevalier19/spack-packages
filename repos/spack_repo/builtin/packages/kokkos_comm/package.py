@@ -25,8 +25,8 @@ class KokkosComm(CMakePackage):
     variant("nccl", description="Enable NCCL backend", default=False)
 
     # Mandatory dependencies
-    depends_on("cxx")
-    depends_on("c", when="+mpi")
+    depends_on("cxx", type="build")
+    depends_on("c", type="build")  # temporary, for googletest
     depends_on("cmake@3.25:", type="build")
 
     depends_on("kokkos@4.7:")
