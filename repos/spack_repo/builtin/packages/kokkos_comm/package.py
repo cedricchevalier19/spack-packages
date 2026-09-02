@@ -8,7 +8,10 @@ from spack.package import *
 
 
 class KokkosComm(CMakePackage):
-    """Kokkos Comm is an experimental performance portable explicit communication interface for the Kokkos ecosystem."""
+    """
+    Kokkos Comm is an experimental performance portable explicit communication interface
+    for the Kokkos ecosystem.
+    """
 
     homepage = "https://github.com/kokkos/kokkos-comm"
     url = "https://github.com/kokkos/kokkos-comm/archive/refs/tags/v0.1.0.tar.gz"
